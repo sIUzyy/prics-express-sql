@@ -1,0 +1,19 @@
+{
+  "name": "prics-epod-express-sql",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon --env-file=.env app.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "express-validator": "^7.2.1",
+    "mssql": "^11.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}
