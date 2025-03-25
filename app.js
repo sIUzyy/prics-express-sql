@@ -11,6 +11,7 @@ const PORT = process.env.PORT || process.env.ALTER_SERVER_PORT;
 
 // ---- route ----
 const activityRoutes = require("./routes/activity-route");
+const driverRoutes = require("./routes/driver-route");
 
 // ---- initialize an express ----
 const app = express();
@@ -38,6 +39,7 @@ app.use(dbMiddleware);
 
 // ---- middleware for routes ----
 app.use("/api/activity", activityRoutes);
+app.use("/api/driver", driverRoutes);
 
 // ---- error handling middleware ----
 app.use((error, req, res, next) => {

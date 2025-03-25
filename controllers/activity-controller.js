@@ -21,7 +21,7 @@ const createActivity = async (req, res, next) => {
       .request()
       .input("activity_name", sql.NVarChar(30), activity_name)
       .input("description", sql.NVarChar(100), description || null)
-      .execute("CreateActivity");
+      .execute("createActivity");
 
     const newActivityId = result.recordset[0]?.new_activity_id; // get the auto-generated ID
 
@@ -43,7 +43,7 @@ const createActivity = async (req, res, next) => {
 const getActivities = async (req, res, next) => {
   try {
     const pool = await req.db; // get the database connection from middleware
-    const result = await pool.request().execute("GetActivities");
+    const result = await pool.request().execute("getActivities");
 
     res.status(200).json({ activities: result.recordset }); // send retrieved data
   } catch (err) {
