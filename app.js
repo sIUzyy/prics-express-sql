@@ -13,6 +13,7 @@ const PORT = process.env.PORT || process.env.ALTER_SERVER_PORT;
 const warehouseRoutes = require("./routes/warehouse-route");
 const activityRoutes = require("./routes/activity-route");
 const driverRoutes = require("./routes/driver-route");
+const truckRoutes = require("./routes/truck-route");
 
 // ---- initialize an express ----
 const app = express();
@@ -42,6 +43,7 @@ app.use(dbMiddleware);
 app.use("/api/warehouse", warehouseRoutes);
 app.use("/api/activity", activityRoutes);
 app.use("/api/driver", driverRoutes);
+app.use("/api/truck", truckRoutes);
 
 // ---- error handling middleware ----
 app.use((error, req, res, next) => {
