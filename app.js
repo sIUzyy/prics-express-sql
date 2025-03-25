@@ -9,6 +9,9 @@ const dbMiddleware = require("./middleware/db-middleware");
 // ---- env ----
 const PORT = process.env.PORT || process.env.ALTER_SERVER_PORT;
 
+// ---- route ----
+const activityRoutes = require("./routes/activity-route");
+
 // ---- initialize an express ----
 const app = express();
 
@@ -32,6 +35,9 @@ app.use(
 
 // ---- initialize db-middleware (automatically adds DB connection to req) ----
 app.use(dbMiddleware);
+
+// ---- middleware for routes ----
+app.use("/api/activity", activityRoutes);
 
 // ---- error handling middleware ----
 app.use((error, req, res, next) => {
