@@ -28,6 +28,14 @@ const createTruck = async (req, res, next) => {
     res.status(201).json({ message: "Truck created successfully" });
   } catch (err) {
     console.error("Error creating truck:", err);
+
+    // Handle duplicate plate number error
+    if (err.number === 50001) {
+      return res
+        .status(400)
+        .json({ message: "Truck with this plate number already exists." });
+    }
+
     const error = new HttpError(
       "Failed to create a truck. Please try again later.",
       500
@@ -45,6 +53,7 @@ const getTrucks = async (req, res, next) => {
     res.status(200).json({ trucks: result.recordset });
   } catch (err) {
     console.error("Error fetching trucks:", err);
+
     const error = new HttpError(
       "Failed to retrieve truck list. Please try again later.",
       500
