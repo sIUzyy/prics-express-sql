@@ -12,6 +12,7 @@ const PORT = process.env.PORT || process.env.ALTER_SERVER_PORT;
 // ---- route ----
 const warehouseRoutes = require("./routes/warehouse-route");
 const activityRoutes = require("./routes/activity-route");
+const apptRoutes = require("./routes/appointment-route");
 const driverRoutes = require("./routes/driver-route");
 const truckRoutes = require("./routes/truck-route");
 const userRoutes = require("./routes/user-route");
@@ -43,6 +44,7 @@ app.use(dbMiddleware);
 // ---- middleware for routes ----
 app.use("/api/warehouse", warehouseRoutes);
 app.use("/api/activity", activityRoutes);
+app.use("/api/appointment", apptRoutes);
 app.use("/api/driver", driverRoutes);
 app.use("/api/truck", truckRoutes);
 app.use("/api/user", userRoutes);
