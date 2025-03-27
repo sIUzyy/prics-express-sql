@@ -136,7 +136,7 @@ const getAppointmentByPlateNo = async (req, res, next) => {
   const { plate_no } = req.params; // Get plate_no from URL parameters
 
   if (!plate_no) {
-    return next(new HttpError("Plate number is required", 400));
+    return res.status(400).json({ message: "Plate number is required" });
   }
 
   try {
@@ -146,20 +146,19 @@ const getAppointmentByPlateNo = async (req, res, next) => {
       .input("plate_no", sql.NVarChar(10), plate_no)
       .execute("getAppointmentByPlateNo");
 
-    if (result.recordset.length === 0) {
-      return next(
-        new HttpError("Appointment not found for this plate number", 404)
-      );
-    }
-
-    res.status(200).json(result.recordset); // Send the retrieved appointments as a JSON response
+    // Return empty array instead of an error if no appointments are found
+    res.status(200).json({
+      message: "Appointments retrieved successfully",
+      appointments: result.recordset || [],
+    });
   } catch (err) {
     console.error("Error fetching appointment:", err);
-    const error = new HttpError(
-      "Failed to retrieve appointment by plate_no. Please try again later.",
-      500
+    return next(
+      new HttpError(
+        "Failed to retrieve appointment. Please try again later.",
+        500
+      )
     );
-    return next(error);
   }
 };
 

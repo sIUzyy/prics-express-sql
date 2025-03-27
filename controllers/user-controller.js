@@ -77,6 +77,10 @@ const signIn = async (req, res, next) => {
 const signInAsDriver = async (req, res, next) => {
   const { plate_no } = req.body;
 
+  if (!plate_no) {
+    return res.status(400).json({ message: "Plate number is required" });
+  }
+
   try {
     const pool = await req.db;
     const result = await pool
@@ -84,23 +88,23 @@ const signInAsDriver = async (req, res, next) => {
       .input("plate_no", sql.NVarChar(10), plate_no)
       .execute("SignInAsDriver");
 
-    if (result.recordset.length === 0) {
+    // If the first record contains an error message, deny access
+    if (result.recordset.length > 0 && result.recordset[0].error_message) {
       return res
-        .status(404)
-        .json({ message: "No shipments found for this plate number" });
+        .status(401)
+        .json({ message: result.recordset[0].error_message });
     }
 
-    res.status(200).json({
-      message: "Driver is successfully signed-in",
+    // If no shipments exist but the truck is valid, return an empty shipments array
+    return res.status(200).json({
+      message: "Driver successfully signed in",
       shipments: result.recordset,
     });
   } catch (err) {
     console.error("Error signing in as driver:", err);
-    const error = new HttpError(
-      "Failed to sign in as driver. Please try again later.",
-      500
+    return next(
+      new HttpError("Failed to sign in as driver. Please try again later.", 500)
     );
-    return next(error);
   }
 };
 

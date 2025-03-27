@@ -2,6 +2,8 @@
 const bodyParser = require("body-parser");
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
+const fs = require("fs");
 
 // ---- middleware ----
 const dbMiddleware = require("./middleware/db-middleware");
@@ -41,6 +43,20 @@ app.use(
   })
 );
 
+// ---- static serving ----
+app.use("/uploads/images", express.static(path.join("uploads", "images"))); // static serving
+
+// ---- enable cors for static serving ----
+app.use("/uploads/images", (req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*"); // Allow all origins (change to specific URL in production)
+  res.header("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  next();
+});
+
 // ---- initialize db-middleware (automatically adds DB connection to req) ----
 app.use(dbMiddleware);
 
@@ -57,6 +73,13 @@ app.use("/api/user", userRoutes);
 
 // ---- error handling middleware ----
 app.use((error, req, res, next) => {
+  // multer
+  if (req.file) {
+    fs.unlink(req.file.path, (err) => {
+      console.log(err);
+    }); // delete the image if theres an error
+  }
+
   // check if response has already been sent
   if (res.headerSent) {
     return next(error); // if yes, we won't send a response on our own.

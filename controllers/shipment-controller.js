@@ -60,7 +60,7 @@ const getShipments = async (req, res, next) => {
   try {
     const pool = await req.db; // Get DB connection
 
-    // Execute stored procedure
+    // Fetch shipments with total_cbm already included
     const result = await pool.request().execute("getShipments");
 
     res.status(200).json({ shipments: result.recordset });
@@ -111,13 +111,11 @@ const getShipmentByPlateNo = async (req, res, next) => {
       .input("plate_no", sql.NVarChar(10), plate_no)
       .execute("getShipmentByPlateNo");
 
-    if (result.recordset.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No shipments found for this plate number" });
-    }
-
-    res.status(200).json({ shipments: result.recordset });
+    // Return empty array instead of a 404 error
+    res.status(200).json({
+      message: "Shipments retrieved successfully",
+      shipments: result.recordset || [],
+    });
   } catch (err) {
     console.error("Error fetching shipments:", err);
     return next(
