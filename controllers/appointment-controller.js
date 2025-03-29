@@ -58,7 +58,7 @@ const createAppointment = async (req, res, next) => {
       .request()
       .input("appointment_id", sql.NVarChar(50), appointment_id)
       .input("appointment_date", sql.Date, appointment_date)
-      .input("appointment_time", sql.NVarChar(10), appointment_time)
+      .input("appointment_time", sql.NVarChar(30), appointment_time)
       .input("carrier_name", sql.NVarChar(100), carrier_name)
       .input("warehouse_name", sql.NVarChar(100), warehouse_name)
       .input("warehouse_address", sql.NVarChar(255), warehouse_address)
@@ -225,7 +225,7 @@ const updateTimeInByApptId = async (req, res, next) => {
   try {
     const pool = await req.db; // Get the database connection
 
-    // retrieve the appointment date
+    // Retrieve the appointment details
     const appointmentResult = await pool
       .request()
       .input("appointment_id", sql.NVarChar(50), appointment_id)
@@ -239,13 +239,16 @@ const updateTimeInByApptId = async (req, res, next) => {
 
     const appointment = appointmentResult.recordset[0];
 
-    // get today's date and the appointment date
-    const today = dayjs().tz("Asia/Manila").startOf("day"); // start of today (Manila time)
+    // Get today's date in Manila timezone (start of day)
+    const today = dayjs().tz("Asia/Manila").startOf("day");
+
+    // convert database appointment date to Manila timezone (start of day)
     const appointmentDate = dayjs
       .utc(appointment.appointment_date)
       .tz("Asia/Manila")
-      .startOf("day"); // convert UTC to Manila time
+      .startOf("day");
 
+    // Check if appointment date matches today's date
     if (!appointmentDate.isSame(today, "day")) {
       return res.status(400).json({
         message: "This appointment is not scheduled for today.",
@@ -253,19 +256,19 @@ const updateTimeInByApptId = async (req, res, next) => {
       });
     }
 
-    // check if time_in already exists
+    // Check if time-in is already recorded
     if (appointment.time_in) {
       return res.status(400).json({
         message: "Time-in already recorded",
       });
     }
 
-    // get current time in Asia/Manila timezone
+    // Get current time in Asia/Manila timezone
     const formattedTimeIn = dayjs()
       .tz("Asia/Manila")
       .format("YYYY-MM-DD HH:mm:ss");
 
-    // update time_in and status in the database
+    // Update time_in and status in the database
     await pool
       .request()
       .input("appointment_id", sql.NVarChar(50), appointment_id)
@@ -275,17 +278,24 @@ const updateTimeInByApptId = async (req, res, next) => {
         "UPDATE appointments SET time_in = @time_in, status = @status WHERE appointment_id = @appointment_id"
       );
 
-    res.status(200).json({
+    // Fetch the updated appointment details
+    const updatedAppointmentResult = await pool
+      .request()
+      .input("appointment_id", sql.NVarChar(50), appointment_id)
+      .query(
+        "SELECT * FROM appointments WHERE appointment_id = @appointment_id"
+      );
+
+    return res.status(200).json({
       message: "Time-in recorded successfully",
-      time_in: formattedTimeIn,
+      appointment: updatedAppointmentResult.recordset[0], // Return full updated data
     });
   } catch (err) {
     console.error("Error updating time-in:", err);
-    const error = new HttpError(
-      "Failed to update time in by appt id. Please try again later.",
-      500
-    );
-    return next(error);
+    return res.status(500).json({
+      message: "Failed to update time-in. Please try again later.",
+      error: err.message,
+    });
   }
 };
 
@@ -294,14 +304,14 @@ const updateTimeOutByApptId = async (req, res, next) => {
   const { appointment_id } = req.params;
 
   try {
-    const pool = await req.db; // get the database connection
+    const pool = await req.db; // Get the database connection
 
-    // retrieve the appointment details
+    // Retrieve the appointment details
     const appointmentResult = await pool
       .request()
       .input("appointment_id", sql.NVarChar(50), appointment_id)
       .query(
-        "SELECT time_in, time_out FROM appointments WHERE appointment_id = @appointment_id"
+        "SELECT * FROM appointments WHERE appointment_id = @appointment_id"
       );
 
     if (appointmentResult.recordset.length === 0) {
@@ -310,14 +320,14 @@ const updateTimeOutByApptId = async (req, res, next) => {
 
     const appointment = appointmentResult.recordset[0];
 
-    // ensure time_in is recorded before allowing time_out update
+    // Ensure time_in is recorded before allowing time_out update
     if (!appointment.time_in) {
       return res
         .status(400)
         .json({ message: "Time-in must be recorded first" });
     }
 
-    // prevent multiple updates to time_out
+    // Prevent multiple updates to time_out
     if (appointment.time_out) {
       return res.status(400).json({
         message: "Time-out already recorded",
@@ -325,12 +335,12 @@ const updateTimeOutByApptId = async (req, res, next) => {
       });
     }
 
-    // get current time in Asia/Manila timezone
+    // Get current time in Asia/Manila timezone
     const formattedTimeOut = dayjs()
       .tz("Asia/Manila")
       .format("YYYY-MM-DD HH:mm:ss");
 
-    // update time_out and status in the database
+    // Update time_out and status in the database
     await pool
       .request()
       .input("appointment_id", sql.NVarChar(50), appointment_id)
@@ -340,17 +350,26 @@ const updateTimeOutByApptId = async (req, res, next) => {
         "UPDATE appointments SET time_out = @time_out, status = @status WHERE appointment_id = @appointment_id"
       );
 
+    // Retrieve the updated appointment details
+    const updatedAppointmentResult = await pool
+      .request()
+      .input("appointment_id", sql.NVarChar(50), appointment_id)
+      .query(
+        "SELECT * FROM appointments WHERE appointment_id = @appointment_id"
+      );
+
+    const updatedAppointment = updatedAppointmentResult.recordset[0];
+
     res.status(200).json({
       message: "Time-out recorded successfully",
-      time_out: formattedTimeOut,
+      appointment: updatedAppointment, // Return all updated appointment data
     });
   } catch (err) {
     console.error("Error updating time-out:", err);
-    const error = new HttpError(
-      "Failed to update time out by appt id. Please try again later.",
-      500
-    );
-    return next(error);
+    return res.status(500).json({
+      message: "Failed to update time-out. Please try again later.",
+      error: err.message,
+    });
   }
 };
 
