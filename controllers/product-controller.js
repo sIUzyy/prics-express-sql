@@ -51,13 +51,8 @@ const getProductByTrackingNo = async (req, res, next) => {
       .input("tracking_no", sql.NVarChar(20), tracking_no)
       .execute("getProductByTrackingNo");
 
-    if (result.recordset.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No products found for this tracking number" });
-    }
-
-    res.status(200).json(result.recordset);
+    // Return empty array if no products found
+    res.status(200).json(result.recordset || []);
   } catch (err) {
     console.error("Error fetching products:", err);
     return next(
