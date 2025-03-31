@@ -20,7 +20,7 @@ router.post("/signin-as-driver", userController.signInAsDriver);
 router.get("/guard-role", userController.getUserGuardRole);
 
 // ---- delete user by its username
-router.delete("/:username", userController.deleteUserByUsername);
+router.delete("/:username/delete-user", userController.deleteUserByUsername);
 
 // ---- exports ----
 module.exports = router;

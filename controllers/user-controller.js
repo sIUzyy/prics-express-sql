@@ -51,7 +51,6 @@ const signIn = async (req, res, next) => {
     }
 
     const user = result.recordset[0];
-    console.log(user);
 
     // Compare hashed password with the plain text password
     const isMatch = await bcrypt.compare(password, user.password);
@@ -59,7 +58,7 @@ const signIn = async (req, res, next) => {
       return res.status(401).json({ message: "Invalid username or password" });
     }
 
-    // Remove password before sending response
+    // remove password before sending response
     delete user.password;
 
     res.status(200).json({ message: "Sign-in successful", user });
@@ -112,16 +111,11 @@ const signInAsDriver = async (req, res, next) => {
 const getUserGuardRole = async (req, res, next) => {
   try {
     const pool = await req.db; // Get the database connection
-
     const result = await pool.request().execute("getUserGuardRole");
-
-    if (result.recordset.length === 0) {
-      return res.status(404).json({ message: "No guards found" });
-    }
 
     res.status(200).json({
       message: "Guards role retrieved successfully",
-      guards: result.recordset,
+      guards: result.recordset || [], // Return empty array if no records
     });
   } catch (err) {
     console.error("Error retrieving guards:", err);
@@ -133,7 +127,7 @@ const getUserGuardRole = async (req, res, next) => {
   }
 };
 
-// http://localhost:8000/api/user/:username - GET
+// http://localhost:8000/api/user/:username/delete-user - DELETE
 const deleteUserByUsername = async (req, res, next) => {
   const { username } = req.params; // Get username from request parameters
 

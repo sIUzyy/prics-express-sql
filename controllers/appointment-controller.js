@@ -177,9 +177,6 @@ const updateAppointmentByApptId = async (req, res, next) => {
     dock,
     plate_no,
     activity,
-    status,
-    time_in,
-    time_out,
   } = req.body;
 
   if (!appointment_id) {
@@ -192,7 +189,7 @@ const updateAppointmentByApptId = async (req, res, next) => {
       .request()
       .input("appointment_id", sql.NVarChar(50), appointment_id)
       .input("appointment_date", sql.Date, appointment_date)
-      .input("appointment_time", sql.NVarChar(10), appointment_time)
+      .input("appointment_time", sql.NVarChar(30), appointment_time)
       .input("carrier_name", sql.NVarChar(100), carrier_name)
       .input("warehouse_name", sql.NVarChar(100), warehouse_name)
       .input("warehouse_address", sql.NVarChar(255), warehouse_address)
@@ -202,9 +199,6 @@ const updateAppointmentByApptId = async (req, res, next) => {
       .input("dock", sql.NVarChar(20), dock)
       .input("plate_no", sql.NVarChar(10), plate_no)
       .input("activity", sql.NVarChar(100), activity)
-      .input("status", sql.NVarChar(50), status)
-      .input("time_in", sql.NVarChar(30), time_in)
-      .input("time_out", sql.NVarChar(30), time_out)
       .execute("updateAppointmentByApptId");
 
     res.status(200).json({ message: "Appointment updated successfully" });
