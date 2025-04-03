@@ -69,12 +69,6 @@ const getPreDeliveryByTrackingNo = async (req, res, next) => {
       return res.status(200).json([]);
     }
 
-    // if (!preDelivery.length) {
-    //   return res
-    //     .status(200)
-    //     .json({ message: "No pre-delivery data available", data: null });
-    // }
-
     // Attach images to the corresponding products
     products.forEach((product) => {
       product.uploadedImages = images
