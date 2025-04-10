@@ -72,6 +72,14 @@ app.use("/api/driver", driverRoutes);
 app.use("/api/truck", truckRoutes);
 app.use("/api/user", userRoutes);
 
+// ---- show a message when the root is accessed ----
+app.get("/", (req, res) => {
+  res.json({
+    message:
+      "PRICS Technologies Inc., ePOD backend API - powered by Express.js",
+  });
+});
+
 // ---- error handling middleware ----
 app.use((error, req, res, next) => {
   // multer
