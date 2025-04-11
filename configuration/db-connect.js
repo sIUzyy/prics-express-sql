@@ -6,23 +6,12 @@
  */
 
 // ---- db connection ----
+require("dotenv").config();
 const sqlConfiguration = require("./db-config");
 const sql = require("mssql");
 
 let pool;
 
-// const connectToDB = async () => {
-//   try {
-//     if (!pool) {
-//       pool = await sql.connect(sqlConfiguration);
-//       console.log("Connected to SQL Server...");
-//     }
-//     return pool;
-//   } catch (err) {
-//     console.error("Database connection failed:", err);
-//     process.exit(1);
-//   }
-// };
 const connectToDB = async () => {
   try {
     if (!pool) {
